@@ -1,20 +1,30 @@
-// Import the 'express' module
 import express, { Request, Response } from 'express'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+import app from './app'
 
-// Create an Express application
-const app = express()
+dotenv.config({
+    path: './config.env',
+})
 
-// Set the port number for the server
-const port: number = 3000
-
-// Define a route for the root path ('/')
 app.get('/', (req: Request, res: Response) => {
-    // Send a response to the client
     res.send('Hello, TypeScript + Node.js + Express123!')
 })
 
-// Start the server and listen on the specified port
+const DB: string = process.env.DATABASE!.replace(
+    '<PASSWORD>',
+    process.env.DATABASE_PASSWORD!
+)
+mongoose
+    .connect(DB)
+    .then(() => {
+        console.log('DB Connected ')
+    })
+    .catch((err: Error) => {
+        console.error('Error connecting to database', err.message)
+    })
+
+const port: number = Number(process.env.PORT) || 3000
 app.listen(port, () => {
-    // Log a message when the server is successfully running
-    console.log(`Server is running on http://localhost:${port}`)
+    console.log(`App listening on port${port}`)
 })
