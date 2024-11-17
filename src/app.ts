@@ -10,7 +10,6 @@ app.use(express.json({ limit: '10kb' }))
 app.use('/api/v1/users', userRouter)
 
 app.all('*', (req, res, next) => {
-    console.log('dsadasdas')
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
 })
 
