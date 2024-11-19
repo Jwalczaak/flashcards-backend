@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import User from '../models/userModel'
+import catchAsync from '../utils/catchAsync'
 
-const signup = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+const signup = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
         const newUser = await User.create({
             name: req.body.name,
             surname: req.body.surname,
@@ -16,10 +17,8 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
                 user: newUser,
             },
         })
-    } catch (err) {
-        next(err)
     }
-}
+)
 
 const authController = {
     signup,

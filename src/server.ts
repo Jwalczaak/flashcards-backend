@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import { Request, Response } from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import app from './app'
@@ -11,10 +11,13 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, TypeScript + Node.js + Express123!')
 })
 
-const DB: string = process.env.DATABASE!.replace(
-    '<PASSWORD>',
-    process.env.DATABASE_PASSWORD!
-)
+// const DB: string = process.env.DATABASE!
+const DB: string = process.env
+    .DATABASE_CONNECTION_STRING!.replace(
+        '<PASSWORD>',
+        process.env.DATABASE_PASSWORD!
+    )
+    .replace('<USERNAME>', process.env.DATABASE_USERNAME!)
 mongoose
     .connect(DB)
     .then(() => {
