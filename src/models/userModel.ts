@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema<UserDocument>({
         required: [true, 'Password is required'],
 
         validate: {
-            // This only works on CREATE and SAVE!!!
             validator: function (el) {
                 return el === this.password
             },

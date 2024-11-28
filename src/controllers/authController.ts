@@ -16,9 +16,7 @@ const signup = catchAsync(
             passwordConfirm: req.body.passwordConfirm,
         })
 
-        console.log(newUser)
-
-        newUser.password = undefined
+        // newUser.password = undefined
 
         res.status(200).json({
             status: 'success',
@@ -37,11 +35,8 @@ const login = catchAsync(
             return next(new AppError('Please provide email and password', 400))
         }
 
-        const user = await User.findOne({ email: email })
+        const user = await User.findOne({ email }).select('+password')
 
-        if (!user || !(await user.correctPassword(password, user.password))) {
-            return next(new AppError('Incorrect email or password', 401))
-        }
         res.status(200).json({
             status: 'success',
             data: {
