@@ -1,6 +1,7 @@
 import { UserRole } from '../enums/UserRole.enum'
 
 export interface UserDTO {
+    _id: string
     name: string
     surname: string
     email: string
@@ -8,6 +9,7 @@ export interface UserDTO {
     role: UserRole
     password: string
     passwordConfirm: string | undefined
+    __v: number
 }
 
 export interface UserDocument extends Document, UserDTO {
@@ -27,15 +29,17 @@ export interface UserSignUpRequest {
     passwordConfirm: string | undefined
 }
 
-export interface UserSignUpResponse {
-    _id: number
-    role: UserRole
-    name: string
-    email: string
-    __v: string
-}
-
 export interface UserLoginRequest {
     email: string
     passowrd: string
+}
+
+export interface UserEntity {
+    _id: string
+    name: string
+    surname: string
+    email: string
+    role: UserRole
+    password: string | undefined
+    __v: number
 }
