@@ -4,8 +4,9 @@ import catchAsync from '../utils/catchAsync'
 import { UserDocument, UserEntity } from '../interfaces/User'
 import AppError from '../utils/AppError'
 import jwt from 'jsonwebtoken'
+import { ObjectId } from 'mongoose'
 
-const signToken = (id: string) => {
+const signToken = (id: ObjectId) => {
     return jwt.sign({ id }, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN,
     })
