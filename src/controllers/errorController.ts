@@ -1,4 +1,4 @@
-import { NextFunction, request, Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import AppError from '../utils/AppError'
 
 const handleCastErrorDB = (err: any) => {
@@ -7,6 +7,7 @@ const handleCastErrorDB = (err: any) => {
 }
 
 const handleDuplicateFieldsDB = (err: any) => {
+    console.log(err)
     const value = err.message.match(/(["'])(\\?.)*?\1/)[0]
 
     const message = `Duplicate field value: ${value}. Please use another value!`
