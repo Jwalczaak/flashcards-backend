@@ -15,14 +15,16 @@ const handleDuplicateFieldsDB = (err: any) => {
 }
 
 const handleValidationErrorDB = (err: any) => {
+    console.log('heheheheh')
     const errors = Object.values(err.errors).map((el: any) => el.message)
     const message = `Invalid input data. ${errors.join('. ')}`
     return new AppError(message, 400)
 }
 
 const sendErrorProd = (err: any, req: Request, res: Response) => {
-    console.log(err)
+    console.log(req.originalUrl)
     if (req.originalUrl.startsWith('/api')) {
+        console.log(err.message)
         if (err.isOperational) {
             return res.status(err.statusCode).json({
                 status: err.status,
@@ -30,7 +32,7 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
             })
         }
 
-        console.error('Error', err)
+        // console.error('Error', err)
 
         return res.status(500).json({
             status: 'error',
@@ -62,11 +64,11 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
         err.status ||
         (err.statusCode >= 400 && err.statusCode < 500 ? 'fail' : 'error')
 
-    let error = { ...err }
+    let error = Object.assign(err)
     error.message = err.message
 
     if (error.name === 'CaseError') error = handleCastErrorDB(error)
-    if (error.code) error = handleDuplicateFieldsDB(error)
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error)
     if (error.name === 'ValidationError') error = handleValidationErrorDB(error)
 
     sendErrorProd(error, req, res)
