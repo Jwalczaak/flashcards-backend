@@ -6,6 +6,8 @@ import AppError from '../utils/AppError'
 import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
 
+import { DecodedToken } from '../interfaces/auth'
+
 const signToken = (id: ObjectId) => {
     return jwt.sign({ id }, process.env.JWT_SECRET!, {
         expiresIn: process.env.JWT_EXPIRES_IN,
@@ -23,7 +25,8 @@ const createSendToken = (
 
     res.cookie('jwt', token, {
         expires: new Date(
-            Date.now() + parseInt(process.env.JWT_EXPIRES_IN!) * 1000
+            Date.now() +
+                parseInt(process.env.JWT_EXPIRES_IN!) * 24 * 60 * 60 * 1000
         ),
         httpOnly: true,
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
@@ -76,9 +79,60 @@ const login = catchAsync(
     }
 )
 
+export const protect = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        let token: string | undefined
+
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer ')
+        ) {
+            token = req.headers.authorization.split(' ')[1]
+        } else if (req.cookies?.jwt) {
+            token = req.cookies.jwt
+        }
+
+        if (!token) {
+            return next(
+                new AppError(
+                    'You are not logged in! Please log in to access this resource.',
+                    401
+                )
+            )
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_SECRET as string
+        ) as DecodedToken
+
+        const currentUser = await User.findById(decoded.id)
+        console.log(currentUser)
+
+        if (!currentUser) {
+            return next(
+                new AppError(
+                    'The user belonging to this token does no longer exist.',
+                    401
+                )
+            )
+        }
+        next()
+    } catch (error: any) {
+        return next(
+            new AppError('Invalid or expired token. Please log in again.', 401)
+        )
+    }
+}
+
 const authController = {
     signup,
     login,
+    protect,
 }
 
 export default authController
