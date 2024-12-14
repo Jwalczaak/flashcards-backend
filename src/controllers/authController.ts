@@ -20,7 +20,6 @@ const createSendToken = (
     req: Request,
     res: Response
 ) => {
-    console.log(user)
     const token = signToken(user._id)
 
     res.cookie('jwt', token, {
@@ -79,11 +78,18 @@ const login = catchAsync(
     }
 )
 
-export const protect = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+const logout = (req: Request, res: Response) => {
+    res.cookie('jwt', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true,
+    })
+    res.status(200).json({
+        status: 'success',
+        message: 'Logged out successfully',
+    })
+}
+
+const protect = async (req: Request, res: Response, next: NextFunction) => {
     try {
         let token: string | undefined
 
@@ -111,7 +117,6 @@ export const protect = async (
         ) as DecodedToken
 
         const currentUser = await User.findById(decoded.id)
-        console.log(currentUser)
 
         if (!currentUser) {
             return next(
@@ -132,6 +137,7 @@ export const protect = async (
 const authController = {
     signup,
     login,
+    logout,
     protect,
 }
 
