@@ -1,6 +1,9 @@
 import express from 'express'
 import flashcardsCollectionController from '../controllers/flashcardCollectionController'
+import authController from '../controllers/authController'
 const flashcardCollectionRouter = express.Router()
+
+flashcardCollectionRouter.use(authController.protect)
 
 flashcardCollectionRouter
     .route('/')
