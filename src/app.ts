@@ -10,7 +10,7 @@ app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 
 app.use('/api/v1/collection', flashcardCollectionRouter)
-app.use('/api/v1/users', userRouter)
+app.use('/api/v1/auth', userRouter)
 
 app.all('*', (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404))
