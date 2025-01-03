@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { CollectionDTO } from '../interfaces/collection'
+import { CollectionDTO } from '../interfaces/Collection'
 
 const flashcardCollectionSchema = new mongoose.Schema<CollectionDTO>({
     userId: {

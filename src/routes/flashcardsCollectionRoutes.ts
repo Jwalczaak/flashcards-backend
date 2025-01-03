@@ -7,6 +7,7 @@ flashcardCollectionRouter.use(authController.protect)
 
 flashcardCollectionRouter
     .route('/')
+    .get(flashcardsCollectionController.getAllFlashcardsCollections)
     .post(flashcardsCollectionController.createFlashcardsCollection)
 
 flashcardCollectionRouter

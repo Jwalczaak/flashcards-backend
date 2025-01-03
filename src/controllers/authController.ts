@@ -6,7 +6,7 @@ import AppError from '../utils/AppError'
 import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
 
-import { DecodedToken } from '../interfaces/auth'
+import { DecodedToken } from '../interfaces/Auth'
 
 const signToken = (id: ObjectId) => {
     return jwt.sign({ id }, process.env.JWT_SECRET!, {
