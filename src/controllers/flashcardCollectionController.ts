@@ -14,11 +14,15 @@ const updateFlashcardsCollection =
 const deleteFlashcardsCollection =
     handlerFactoryController.deleteOne(FlashcardCollection)
 
+const getAllFlashcardsCollections =
+    handlerFactoryController.getAll(FlashcardCollection)
+
 const flashcardCollectionController = {
     getFlashcardsCollection,
     createFlashcardsCollection,
     updateFlashcardsCollection,
     deleteFlashcardsCollection,
+    getAllFlashcardsCollections,
 }
 
 export default flashcardCollectionController

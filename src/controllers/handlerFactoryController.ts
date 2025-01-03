@@ -3,6 +3,8 @@ import { NextFunction, Request, Response } from 'express'
 import AppError from '../utils/AppError'
 
 import { Model, PopulateOptions } from 'mongoose'
+import { APIFeatures } from '../utils/apiFeatures'
+import { QueryParams } from '../interfaces/ApiFeaturesOptions'
 const deleteOne = <T>(Model: Model<T>) =>
     catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const doc = await Model.findByIdAndDelete(req.params.id)
@@ -72,11 +74,36 @@ const getOne = <T>(
         })
     })
 
+const getAll = <T>(Model: Model<T>) =>
+    catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const queryParams = req.query as QueryParams
+        console.log(req.query)
+
+        const features = new APIFeatures({
+            query: Model.find(),
+            queryString: queryParams,
+        })
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate()
+
+        const doc = await features.getQuery()
+
+        res.status(200).json({
+            status: 'success',
+            results: doc.length,
+
+            data: doc,
+        })
+    })
+
 const handlerFactoryController = {
     deleteOne,
     updateOne,
     createOne,
     getOne,
+    getAll,
 }
 
 export default handlerFactoryController
