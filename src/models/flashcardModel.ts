@@ -1,6 +1,5 @@
 import mongoose from 'mongoose'
 import { FlashcardDTO } from '../interfaces/Flashcard'
-// import {CollectionD}
 
 const flashcardSchema = new mongoose.Schema<FlashcardDTO>({
     name: {

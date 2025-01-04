@@ -32,15 +32,11 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
             })
         }
 
-        // console.error('Error', err)
-
         return res.status(500).json({
             status: 'error',
             message: 'Something went very wrong!',
         })
     }
-
-    //RENDERED WEBSITE
 
     if (err.isOperational) {
         return res.status(err.statusCode).render('error', {
