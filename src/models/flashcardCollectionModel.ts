@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
-import { CollectionDTO } from '../interfaces/Collection'
+import { FlashcardCollectionDTO } from '../interfaces/FlashcardsCollection'
 
-const flashcardCollectionSchema = new mongoose.Schema<CollectionDTO>({
+const flashcardCollectionSchema = new mongoose.Schema<FlashcardCollectionDTO>({
     userId: {
         type: mongoose.Schema.ObjectId,
         required: [true, 'userId is required'],

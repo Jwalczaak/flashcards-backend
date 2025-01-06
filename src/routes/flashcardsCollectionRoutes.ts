@@ -16,6 +16,4 @@ flashcardCollectionRouter
     .patch(flashcardsCollectionController.updateFlashcardsCollection)
     .delete(flashcardsCollectionController.deleteFlashcardsCollection)
 
-flashcardCollectionRouter.route('/me')
-
 export default flashcardCollectionRouter

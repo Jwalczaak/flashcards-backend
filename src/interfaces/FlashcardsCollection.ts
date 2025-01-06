@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongoose'
 
-export interface CollectionDTO {
+export interface FlashcardCollectionDTO {
     _id: ObjectId
     userId: ObjectId
     name: string

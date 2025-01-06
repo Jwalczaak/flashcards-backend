@@ -11,7 +11,6 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, TypeScript + Node.js + Express123!')
 })
 
-// const DB: string = process.env.DATABASE!
 const DB: string = process.env
     .DATABASE_CONNECTION_STRING!.replace(
         '<PASSWORD>',
