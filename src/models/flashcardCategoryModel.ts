@@ -62,8 +62,4 @@ const FlashcardCategory = mongoose.model(
     flashcardCategorySchema
 )
 
-FlashcardCategory.createIndexes().then(() => {
-    console.log('Indexes are successfully created!')
-})
-
 export default FlashcardCategory
