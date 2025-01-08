@@ -1,8 +1,9 @@
 import { ObjectId } from 'mongoose'
 
-export interface FlashcardCollectionDTO {
+export interface FlashcardCategoryDTO {
     _id: ObjectId
     userId: ObjectId
+    isGlobal: boolean
     name: string
     description?: string
     sharedWith?: ObjectId[]

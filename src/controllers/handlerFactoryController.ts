@@ -77,10 +77,21 @@ const getOne = <T>(
 const getAll = <T>(Model: Model<T>) =>
     catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const queryParams = req.query as QueryParams
-        console.log(req.query)
+
+        const filterHandlers: { [key: string]: (req: Request) => object } = {
+            userId: () => ({ userId: req.params.userId }),
+            isGlobal: () => ({ isGlobal: true }),
+        }
+
+        let filter: object = {}
+        for (const key of Object.keys(req.params)) {
+            if (filterHandlers[key]) {
+                filter = { ...filter, ...filterHandlers[key](req) }
+            }
+        }
 
         const features = new APIFeatures({
-            query: Model.find(),
+            query: Model.find(filter),
             queryString: queryParams,
         })
             .filter()
