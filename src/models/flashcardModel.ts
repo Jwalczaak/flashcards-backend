@@ -6,18 +6,29 @@ const flashcardSchema = new mongoose.Schema<FlashcardDTO>({
         type: String,
         required: [false, 'Name is required'],
         unique: true,
+        minlength: 3,
     },
+
+    categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'flashcardCategory',
+        required: [true, 'Category is required'],
+    },
+
     description: {
         type: String,
         maxLength: 256,
+        minlength: 3,
     },
     flashcardLanguage: {
         type: String,
         required: [true, 'Flashcard language is required'],
+        minlength: 2,
     },
     translation: {
         type: String,
         required: [true, 'Translation is required'],
+        minlength: 3,
     },
 
     createdAt: {
