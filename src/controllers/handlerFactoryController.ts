@@ -81,6 +81,7 @@ const getAll = <T>(Model: Model<T>) =>
         const filterHandlers: { [key: string]: (req: Request) => object } = {
             userId: () => ({ userId: req.params.userId }),
             isGlobal: () => ({ isGlobal: true }),
+            categotyId: () => ({ categoryId: req.params.categoryId }),
         }
 
         let filter: object = {}
