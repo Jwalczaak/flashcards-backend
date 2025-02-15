@@ -6,7 +6,7 @@ import AppError from '../utils/AppError'
 import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
 
-import { DecodedToken } from '../interfaces/Auth'
+import { DecodedToken, IGetUserAuthInfoRequest } from '../interfaces/Auth'
 
 const signToken = (id: ObjectId) => {
     return jwt.sign({ id }, process.env.JWT_SECRET!, {
@@ -24,8 +24,7 @@ const createSendToken = (
 
     res.cookie('jwt', token, {
         expires: new Date(
-            Date.now() +
-                parseInt(process.env.JWT_EXPIRES_IN!) * 24 * 60 * 60 * 1000
+            Date.now() + parseInt(process.env.JWT_EXPIRES_IN!) * 60 * 1000
         ),
         httpOnly: true,
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
@@ -89,7 +88,24 @@ const logout = (req: Request, res: Response) => {
     })
 }
 
-const protect = async (req: Request, res: Response, next: NextFunction) => {
+const getMe = async (
+    req: IGetUserAuthInfoRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user: req.user,
+        },
+    })
+}
+
+const protect = async (
+    req: IGetUserAuthInfoRequest,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         let token: string | undefined
 
@@ -126,6 +142,8 @@ const protect = async (req: Request, res: Response, next: NextFunction) => {
                 )
             )
         }
+        req.user = currentUser
+        res.locals.user = currentUser
         next()
     } catch (error: any) {
         return next(
@@ -138,6 +156,7 @@ const authController = {
     signup,
     login,
     logout,
+    getMe,
     protect,
 }
 
