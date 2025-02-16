@@ -5,41 +5,48 @@ import { UserDocument, UserEntity } from '../interfaces/User'
 import AppError from '../utils/AppError'
 import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
-
+import authService from '../services/auth.service'
 import { DecodedToken, IGetUserAuthInfoRequest } from '../interfaces/Auth'
 
-const signToken = (id: ObjectId) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET!, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-    })
-}
-
 const createSendToken = (
-    user: UserEntity,
+    userId: ObjectId,
     statusCode: number,
     req: Request,
     res: Response
 ) => {
-    const token = signToken(user._id)
+    const accessToken: string = authService.generateAccessToken(userId)
+    const refreshToken: string = authService.generateRefreshToken(userId)
 
-    res.cookie('jwt', token, {
-        expires: new Date(
-            Date.now() + parseInt(process.env.JWT_EXPIRES_IN!) * 60 * 1000
-        ),
+    res.cookie('refreshToken', refreshToken, {
+        maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN!) * 1000,
         httpOnly: true,
+        sameSite: 'strict',
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
     })
 
-    user.password = undefined
-
     res.status(statusCode).json({
         status: 'success',
-        token,
-        data: {
-            user,
-        },
+        accessToken,
     })
 }
+
+const refreshToken = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const refreshToken: string = req.cookies.refreshToken
+        console.log('dsadas' + refreshToken)
+        if (!refreshToken)
+            return next(
+                new AppError(
+                    'You are not logged in! Please log in to access this resource.',
+                    401
+                )
+            )
+
+        const decoded: any = authService.verifyRefreshToken(refreshToken)
+
+        createSendToken(decoded.userId, 201, req, res)
+    }
+)
 
 const signup = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -53,7 +60,7 @@ const signup = catchAsync(
             passwordConfirm: req.body.passwordConfirm,
         })
 
-        createSendToken(newUser, 201, req, res)
+        createSendToken(newUser._id, 201, req, res)
     }
 )
 
@@ -73,14 +80,15 @@ const login = catchAsync(
             return next(new AppError('Incorrect email or password', 401))
         }
 
-        createSendToken(user, 200, req, res)
+        createSendToken(user._id, 200, req, res)
     }
 )
 
 const logout = (req: Request, res: Response) => {
-    res.cookie('jwt', 'loggedout', {
-        expires: new Date(Date.now() + 10 * 1000),
+    res.clearCookie('refreshToken', {
         httpOnly: true,
+        sameSite: 'strict',
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
     })
     res.status(200).json({
         status: 'success',
@@ -88,76 +96,11 @@ const logout = (req: Request, res: Response) => {
     })
 }
 
-const getMe = async (
-    req: IGetUserAuthInfoRequest,
-    res: Response,
-    next: NextFunction
-) => {
-    res.status(200).json({
-        status: 'success',
-        data: {
-            user: req.user,
-        },
-    })
-}
-
-const protect = async (
-    req: IGetUserAuthInfoRequest,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        let token: string | undefined
-
-        if (
-            req.headers.authorization &&
-            req.headers.authorization.startsWith('Bearer ')
-        ) {
-            token = req.headers.authorization.split(' ')[1]
-        } else if (req.cookies?.jwt) {
-            token = req.cookies.jwt
-        }
-
-        if (!token) {
-            return next(
-                new AppError(
-                    'You are not logged in! Please log in to access this resource.',
-                    401
-                )
-            )
-        }
-
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET as string
-        ) as DecodedToken
-
-        const currentUser = await User.findById(decoded.id)
-
-        if (!currentUser) {
-            return next(
-                new AppError(
-                    'The user belonging to this token does no longer exist.',
-                    401
-                )
-            )
-        }
-        req.user = currentUser
-        res.locals.user = currentUser
-        next()
-    } catch (error: any) {
-        return next(
-            new AppError('Invalid or expired token. Please log in again.', 401)
-        )
-    }
-}
-
 const authController = {
     signup,
     login,
     logout,
-    getMe,
-    protect,
+    refreshToken,
 }
 
 export default authController

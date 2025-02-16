@@ -15,14 +15,18 @@ const handleDuplicateFieldsDB = (err: any) => {
 }
 
 const handleValidationErrorDB = (err: any) => {
-    console.log('heheheheh')
     const errors = Object.values(err.errors).map((el: any) => el.message)
     const message = `Invalid input data. ${errors.join('. ')}`
     return new AppError(message, 400)
 }
 
+const handleJWTError = () =>
+    new AppError('Invalid token. Please log in again!', 401)
+
+const handleJWTExpiredError = () =>
+    new AppError('Your token has expired! Please log in again.', 401)
+
 const sendErrorProd = (err: any, req: Request, res: Response) => {
-    console.log(req.originalUrl)
     if (req.originalUrl.startsWith('/api')) {
         console.log(err.message)
         if (err.isOperational) {
@@ -55,6 +59,7 @@ const sendErrorProd = (err: any, req: Request, res: Response) => {
 }
 
 export default (err: any, req: Request, res: Response, next: NextFunction) => {
+    console.log('dsdasd' + err.name)
     err.statusCode = err.statusCode || 500
     err.status =
         err.status ||
@@ -65,7 +70,10 @@ export default (err: any, req: Request, res: Response, next: NextFunction) => {
 
     if (error.name === 'CaseError') error = handleCastErrorDB(error)
     if (error.code === 11000) error = handleDuplicateFieldsDB(error)
+
     if (error.name === 'ValidationError') error = handleValidationErrorDB(error)
+    if (error.name === 'JsonWebTokenError') error = handleJWTError()
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError()
 
     sendErrorProd(error, req, res)
 }

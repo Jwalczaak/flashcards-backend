@@ -1,9 +1,9 @@
 import express from 'express'
 import flashcardsCategoryController from '../controllers/flashcardCategoryController'
-import authController from '../controllers/authController'
+import authMiddleware from '../middlewares/auth.middleware'
 const flashcardCategoryRouter = express.Router()
 
-flashcardCategoryRouter.use(authController.protect)
+flashcardCategoryRouter.use(authMiddleware.authenticateToken)
 
 flashcardCategoryRouter
     .route('/')
