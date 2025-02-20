@@ -1,11 +1,9 @@
 import express from 'express'
-import authController from '../controllers/authController'
 import flashcardController from '../controllers/flashcardController'
-
+import authMiddleware from '../middlewares/auth.middleware'
 const flashcardRouter = express.Router()
 
-flashcardRouter.use(authController.protect)
-
+flashcardRouter.use(authMiddleware.authenticateToken)
 flashcardRouter
     .route('/')
     .get(flashcardController.getAllFlashcards)
