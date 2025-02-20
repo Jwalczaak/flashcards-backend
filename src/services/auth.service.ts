@@ -15,19 +15,11 @@ const generateRefreshToken = (userId: ObjectId) => {
 }
 
 const verifyAccessToken = (token: string) => {
-    return new Promise<any>((resolve, reject) => {
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, (err, decoded) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(decoded)
-            }
-        })
-    })
+    return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!)
 }
 
 const verifyRefreshToken = (token: string) => {
-    return promisify(jwt.verify)(process.env.REFRESH_TOKEN_SECRET!)
+    return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET!)
 }
 
 const authService = {
