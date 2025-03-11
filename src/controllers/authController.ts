@@ -3,10 +3,8 @@ import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import { UserDocument, UserEntity } from '../interfaces/User'
 import AppError from '../utils/AppError'
-import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
 import authService from '../services/auth.service'
-import { DecodedToken, IGetUserAuthInfoRequest } from '../interfaces/Auth'
 
 const createSendToken = (
     userId: ObjectId,

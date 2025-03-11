@@ -3,7 +3,7 @@ import flashcardsCategoryController from '../controllers/flashcardCategoryContro
 import authMiddleware from '../middlewares/auth.middleware'
 const flashcardCategoryRouter = express.Router()
 
-flashcardCategoryRouter.use(authMiddleware.authenticateToken)
+// flashcardCategoryRouter.use(authMiddleware.authenticateToken)
 
 flashcardCategoryRouter
     .route('/')
