@@ -16,7 +16,12 @@ const createSendToken = (
     const refreshToken: string = authService.generateRefreshToken(userId)
 
     res.cookie('refreshToken', refreshToken, {
-        maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN!) * 1000,
+        maxAge:
+            parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN!) *
+            24 *
+            60 *
+            60 *
+            1000,
         httpOnly: true,
         sameSite: 'strict',
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
