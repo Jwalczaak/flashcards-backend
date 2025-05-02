@@ -1,42 +1,49 @@
-import mongoose from 'mongoose'
-import { UserCategorySessionDTO } from '../interfaces/UserCategorySession'
+import mongoose, { Schema, Model } from 'mongoose'
+import { UserCategorySessionDocument } from '../interfaces/UserCategorySession'
 import { StatusEnum } from '../enums/Status.enum'
 
-const userSchema = new mongoose.Schema<UserCategorySessionDTO>({
+const UserCategorySessionSchema = new Schema<UserCategorySessionDocument>({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'User Id is required'],
     },
     categoryId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'FlashcardCategory',
-        required: [true, 'Surname is required'],
+        required: [true, 'Category Id is required'],
     },
-    visitedCount: {
-        type: Number,
-        required: [true, 'Visited count is required'],
+    notVisitedFlashcardsIds: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Flashcard',
+        required: [true, 'Available flashcards are required'],
     },
-    correctCount: {
-        type: Number,
-        required: [true, 'Correct count is required'],
+    visitedFlashcardsIds: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Flashcard',
+        required: [true, 'Visited flashcards are required'],
     },
-    totalFlashcards: {
-        type: Number,
-        required: [true, 'Total flashcards is required'],
+    guessedFlashcardsIds: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Flashcard',
+        required: [true, 'Guessed flashcards are required'],
     },
     lastReviewedAT: {
         type: Date,
-        default: Date.now(),
+        default: Date.now,
     },
     status: {
         type: String,
-        required: [true, 'Status is required'],
         enum: Object.values(StatusEnum),
         default: StatusEnum.IN_PROGRESS,
+        required: true,
     },
 })
 
-const User = mongoose.model('UserCategorySession', userSchema)
+const UserCategorySession: Model<UserCategorySessionDocument> =
+    mongoose.model<UserCategorySessionDocument>(
+        'UserCategorySession',
+        UserCategorySessionSchema
+    )
 
-export default User
+export default UserCategorySession

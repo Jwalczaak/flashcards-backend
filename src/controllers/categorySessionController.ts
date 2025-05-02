@@ -1,25 +1,58 @@
 import UserCategorySession from '../models/userCategorySessionModel'
 import authService from '../services/auth.service'
-import AppError from '../utils/AppError'
 import catchAsync from '../utils/catchAsync'
 import { NextFunction, Request, Response } from 'express'
 import { Model } from 'mongoose'
+import { JwtPayload } from 'jsonwebtoken'
+import Flashcard from '../models/flashcardModel'
+import { StatusEnum } from '../enums/Status.enum'
+import { UserCategorySessionDocument } from '../interfaces/UserCategorySession'
 
 const getUserCategorySession = <T>(Model: Model<T>) =>
     catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        // const doc = await Model.findById(req.params.id)
+        const categoryId: string = req.params.categoryId
         const refreshToken: string = req.cookies.refreshToken
-        const decoded: any = authService.verifyRefreshToken(refreshToken)
-        console.log(decoded.userId)
-        if (!decoded.userId) {
-            return next(new AppError('No document found with that ID', 404))
+        const decoded: string | JwtPayload = authService.verifyRefreshToken(
+            refreshToken
+        ) as JwtPayload
+
+        let allFlashcardsCount: number
+
+        let session: UserCategorySessionDocument | null =
+            await UserCategorySession.findOne({
+                userId: decoded.userId,
+                categoryId: categoryId,
+            })
+
+        if (!session) {
+            const flashcards = await Flashcard.find({ categoryId })
+            const notVisitedFlashcardsIds: string[] = flashcards.map(
+                (flashcard) => flashcard._id
+            )
+
+            session = await UserCategorySession.create({
+                userId: decoded.userId,
+                categoryId: categoryId,
+                visitedFlashcardsIds: [],
+                guessedFlashcardsIds: [],
+                notVisitedFlashcardsIds,
+                lastReviewedAT: new Date(),
+                status: StatusEnum.IN_PROGRESS,
+            })
+            allFlashcardsCount = notVisitedFlashcardsIds.length
+        } else {
+            allFlashcardsCount =
+                session.notVisitedFlashcardsIds.length +
+                session.visitedFlashcardsIds.length +
+                session.guessedFlashcardsIds.length
         }
 
         res.status(200).json({
             status: 'success',
-            // data: {
-            //     data: doc,
-            // },
+            data: {
+                session,
+                allFlashcardsCount,
+            },
         })
     })
 
