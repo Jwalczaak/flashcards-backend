@@ -3,7 +3,7 @@ import flashcardController from '../controllers/flashcardController'
 import authMiddleware from '../middlewares/auth.middleware'
 const flashcardRouter = express.Router()
 
-flashcardRouter.use(authMiddleware.authenticateToken)
+// flashcardRouter.use(authMiddleware.authenticateToken)
 flashcardRouter
     .route('/')
     .get(flashcardController.getAllFlashcards)

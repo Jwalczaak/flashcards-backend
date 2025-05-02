@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongoose'
-import { UserRole } from '../enums/UserRole.enum'
+import { UserRoleEnum } from '../enums/UserRole.enum'
 
 export interface UserDTO {
     _id: ObjectId
@@ -7,7 +7,7 @@ export interface UserDTO {
     surname: string
     email: string
     photo?: string
-    role: UserRole
+    role: UserRoleEnum
     password: string
     passwordConfirm: string | undefined
     __v: number
@@ -25,7 +25,7 @@ export interface UserSignUpRequest {
     surname: string
     email: string
     photo?: string
-    role: UserRole
+    role: UserRoleEnum
     password: string | undefined
     passwordConfirm: string | undefined
 }
@@ -40,7 +40,7 @@ export interface UserEntity {
     name: string
     surname: string
     email: string
-    role: UserRole
+    role: UserRoleEnum
     password: string | undefined
     __v: number
 }

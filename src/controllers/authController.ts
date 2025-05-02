@@ -3,10 +3,8 @@ import User from '../models/userModel'
 import catchAsync from '../utils/catchAsync'
 import { UserDocument, UserEntity } from '../interfaces/User'
 import AppError from '../utils/AppError'
-import jwt from 'jsonwebtoken'
 import { ObjectId } from 'mongoose'
 import authService from '../services/auth.service'
-import { DecodedToken, IGetUserAuthInfoRequest } from '../interfaces/Auth'
 
 const createSendToken = (
     userId: ObjectId,
@@ -18,7 +16,12 @@ const createSendToken = (
     const refreshToken: string = authService.generateRefreshToken(userId)
 
     res.cookie('refreshToken', refreshToken, {
-        maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN!) * 1000,
+        maxAge:
+            parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN!) *
+            24 *
+            60 *
+            60 *
+            1000,
         httpOnly: true,
         sameSite: 'strict',
         secure: req.secure || req.headers['x-forwarded-proto'] === 'https',

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import { UserDocument } from '../interfaces/User'
 import validator from 'validator'
-import { UserRole } from '../enums/UserRole.enum'
+import { UserRoleEnum } from '../enums/UserRole.enum'
 import bcrypt from 'bcryptjs'
 
 const userSchema = new mongoose.Schema<UserDocument>({
@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema<UserDocument>({
     role: {
         type: String,
         required: [true, 'Role is required'],
-        enum: Object.values(UserRole),
-        default: UserRole.USER,
+        enum: Object.values(UserRoleEnum),
+        default: UserRoleEnum.USER,
     },
 
     password: {
