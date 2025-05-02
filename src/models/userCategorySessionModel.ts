@@ -3,11 +3,12 @@ import { UserCategorySessionDocument } from '../interfaces/UserCategorySession'
 import { StatusEnum } from '../enums/Status.enum'
 
 const UserCategorySessionSchema = new Schema<UserCategorySessionDocument>({
-    userId: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, 'User Id is required'],
+        required: [true, 'User  is required'],
     },
+
     categoryId: {
         type: Schema.Types.ObjectId,
         ref: 'FlashcardCategory',

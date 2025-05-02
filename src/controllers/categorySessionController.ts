@@ -20,9 +20,9 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
 
         let session: UserCategorySessionDocument | null =
             await UserCategorySession.findOne({
-                userId: decoded.userId,
+                user: decoded.userId,
                 categoryId: categoryId,
-            })
+            }).populate('user', 'name')
 
         if (!session) {
             const flashcards = await Flashcard.find({ categoryId })
@@ -31,7 +31,7 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
             )
 
             session = await UserCategorySession.create({
-                userId: decoded.userId,
+                user: decoded.userId,
                 categoryId: categoryId,
                 visitedFlashcardsIds: [],
                 guessedFlashcardsIds: [],
@@ -47,6 +47,7 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
                 session.guessedFlashcardsIds.length
         }
 
+        // Ensure userId and userName are returned as string values
         res.status(200).json({
             status: 'success',
             data: {

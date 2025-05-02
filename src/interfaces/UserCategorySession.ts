@@ -8,9 +8,10 @@ export interface createUserSessionRequest {
     correctCount: number
 }
 
+import { Document } from 'mongoose'
+
 export interface UserCategorySessionDTO {
-    _id: ObjectId
-    userId: ObjectId
+    user: ObjectId
     categoryId: ObjectId
     notVisitedFlashcardsIds: ObjectId[]
     visitedFlashcardsIds: ObjectId[]
@@ -22,6 +23,7 @@ export interface UserCategorySessionDTO {
 export interface UserCategorySessionResponse {
     _id: ObjectId
     userId: ObjectId
+    userName: string
     categoryId: ObjectId
     notVisitedFlashcardsIds: ObjectId[]
     visitedFlashcardsIds: ObjectId[]
