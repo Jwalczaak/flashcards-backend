@@ -47,7 +47,6 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
                 session.guessedFlashcardsIds.length
         }
 
-        // Ensure userId and userName are returned as string values
         res.status(200).json({
             status: 'success',
             data: {
