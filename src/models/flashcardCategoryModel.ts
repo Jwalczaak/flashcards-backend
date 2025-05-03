@@ -1,6 +1,5 @@
 import mongoose from 'mongoose'
 import { FlashcardCategoryDTO } from '../interfaces/FlashcardsCategory'
-import { StatusEnum } from '../enums/Status.enum'
 
 const flashcardCategorySchema = new mongoose.Schema<FlashcardCategoryDTO>({
     name: {
@@ -17,13 +16,6 @@ const flashcardCategorySchema = new mongoose.Schema<FlashcardCategoryDTO>({
         required: function (this: FlashcardCategoryDTO): boolean {
             return !this.isGlobal
         },
-    },
-
-    status: {
-        type: String,
-        required: [true, 'Status is required'],
-        enum: Object.values(StatusEnum),
-        default: StatusEnum.TO_DO,
     },
 
     description: {

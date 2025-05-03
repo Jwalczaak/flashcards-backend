@@ -1,6 +1,5 @@
 import express from 'express'
 import flashcardsCategoryController from '../controllers/flashcardCategoryController'
-import authMiddleware from '../middlewares/auth.middleware'
 import { validateCategoryStatus } from '../middlewares/validateStatus.midleware'
 const flashcardCategoryRouter = express.Router()
 
@@ -8,7 +7,7 @@ const flashcardCategoryRouter = express.Router()
 
 flashcardCategoryRouter
     .route('/')
-    .get(flashcardsCategoryController.getAllFlashcardsCategories)
+    .get(flashcardsCategoryController.getUserCategoriesWithSessions)
     .post(
         validateCategoryStatus,
         flashcardsCategoryController.createFlashcardsCategory

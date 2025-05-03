@@ -2,11 +2,12 @@ import UserCategorySession from '../models/userCategorySessionModel'
 import authService from '../services/auth.service'
 import catchAsync from '../utils/catchAsync'
 import { NextFunction, Request, Response } from 'express'
-import { Model } from 'mongoose'
+import mongoose, { Model } from 'mongoose'
 import { JwtPayload } from 'jsonwebtoken'
 import Flashcard from '../models/flashcardModel'
 import { StatusEnum } from '../enums/Status.enum'
 import { UserCategorySessionDocument } from '../interfaces/UserCategorySession'
+import AppError from '../utils/AppError'
 
 const getUserCategorySession = <T>(Model: Model<T>) =>
     catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -15,8 +16,6 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
         const decoded: string | JwtPayload = authService.verifyRefreshToken(
             refreshToken
         ) as JwtPayload
-
-        let allFlashcardsCount: number
 
         let session: UserCategorySessionDocument | null =
             await UserCategorySession.findOne({
@@ -39,22 +38,41 @@ const getUserCategorySession = <T>(Model: Model<T>) =>
                 lastReviewedAT: new Date(),
                 status: StatusEnum.IN_PROGRESS,
             })
-            allFlashcardsCount = notVisitedFlashcardsIds.length
-        } else {
-            allFlashcardsCount =
-                session.notVisitedFlashcardsIds.length +
-                session.visitedFlashcardsIds.length +
-                session.guessedFlashcardsIds.length
         }
 
         res.status(200).json({
             status: 'success',
             data: {
                 session,
-                allFlashcardsCount,
             },
         })
     })
+
+const getAllUserCategorySessions = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const refreshToken: string = req.cookies.refreshToken
+        const decoded = authService.verifyRefreshToken(
+            refreshToken
+        ) as JwtPayload
+        const userId = decoded.userId as string
+
+        const mode = req.query.mode
+        const match: Record<string, any> = {}
+
+        if (mode === 'global') {
+            match.isGlobal = true
+        } else if (mode === 'user') {
+            match.userId = new mongoose.Types.ObjectId(userId)
+        } else if (!mode) {
+            match.$or = [
+                { isGlobal: true },
+                { userId: new mongoose.Types.ObjectId(userId) },
+            ]
+        } else {
+            return next(new AppError('Invalid mode', 400))
+        }
+    }
+)
 
 const sessionController = {
     getUserCategorySession,
