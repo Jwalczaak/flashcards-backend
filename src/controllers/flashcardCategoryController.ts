@@ -27,14 +27,14 @@ const getUserCategoriesWithSessions = catchAsync(
         const userId = decoded.userId as string
 
         const mode = req.query.mode
-        const match: Record<string, any> = {}
+        const matchFlashcards: Record<string, any> = {}
 
         if (mode === 'global') {
-            match.isGlobal = true
+            matchFlashcards.isGlobal = true
         } else if (mode === 'user') {
-            match.userId = new mongoose.Types.ObjectId(userId)
+            matchFlashcards.userId = new mongoose.Types.ObjectId(userId)
         } else if (!mode) {
-            match.$or = [
+            matchFlashcards.$or = [
                 { isGlobal: true },
                 { userId: new mongoose.Types.ObjectId(userId) },
             ]
@@ -42,7 +42,13 @@ const getUserCategoriesWithSessions = catchAsync(
             return next(new AppError('Invalid mode', 400))
         }
 
-        const categories = await FlashcardCategory.aggregate([
+        const categories = await FlashcardCategory.find(matchFlashcards)
+
+        const categoriesIds: string[] = categories.map((cat) =>
+            cat._id.toString()
+        )
+
+        const categories1 = await FlashcardCategory.aggregate([
             {
                 $match: match,
             },
@@ -87,7 +93,7 @@ const getUserCategoriesWithSessions = catchAsync(
         res.status(200).json({
             status: 'success',
             results: categories.length,
-            data: categories,
+            data: categories1,
         })
     }
 )
