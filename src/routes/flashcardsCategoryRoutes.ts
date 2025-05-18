@@ -14,6 +14,10 @@ flashcardCategoryRouter
     )
 
 flashcardCategoryRouter
+    .route('/dashboard')
+    .get(flashcardsCategoryController.getCategoriesProgress)
+
+flashcardCategoryRouter
     .route('/:id')
     .get(flashcardsCategoryController.getFlashcardsCategory)
     .patch(flashcardsCategoryController.updateFlashcardsCategory)

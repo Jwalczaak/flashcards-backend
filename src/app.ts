@@ -6,7 +6,7 @@ import globalErrorHandler from './controllers/errorController'
 import cookieParser from 'cookie-parser'
 import AppError from './utils/AppError'
 import flashcardRouter from './routes/flashcardRoutes'
-import categorySessionRouter from './routes/categorySessionRoutes'
+
 const app = express()
 
 app.use(express.json({ limit: '10kb' }))
@@ -21,7 +21,6 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 app.use('/api/v1/category', flashcardCategoryRouter)
-app.use('/api/v1/category-session', categorySessionRouter)
 app.use('/api/v1/flashcard', flashcardRouter)
 app.use('/api/v1/auth', userRouter)
 
