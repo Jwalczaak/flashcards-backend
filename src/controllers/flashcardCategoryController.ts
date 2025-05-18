@@ -6,6 +6,8 @@ import { NextFunction, Request, Response } from 'express'
 import { JwtPayload } from 'jsonwebtoken'
 import authService from '../services/auth.service'
 import AppError from '../utils/AppError'
+import Flashcard from '../models/flashcardModel'
+import UserFlashcardProgress from '../models/userFlashcardProgress'
 
 const getFlashcardsCategory = handlerFactoryController.getOne(FlashcardCategory)
 
@@ -27,14 +29,14 @@ const getUserCategoriesWithSessions = catchAsync(
         const userId = decoded.userId as string
 
         const mode = req.query.mode
-        const match: Record<string, any> = {}
+        const matchFlashcards: Record<string, any> = {}
 
         if (mode === 'global') {
-            match.isGlobal = true
+            matchFlashcards.isGlobal = true
         } else if (mode === 'user') {
-            match.userId = new mongoose.Types.ObjectId(userId)
+            matchFlashcards.userId = new mongoose.Types.ObjectId(userId)
         } else if (!mode) {
-            match.$or = [
+            matchFlashcards.$or = [
                 { isGlobal: true },
                 { userId: new mongoose.Types.ObjectId(userId) },
             ]
@@ -42,52 +44,66 @@ const getUserCategoriesWithSessions = catchAsync(
             return next(new AppError('Invalid mode', 400))
         }
 
-        const categories = await FlashcardCategory.aggregate([
-            {
-                $match: match,
-            },
-            {
-                $lookup: {
-                    from: 'usercategorysessions',
-                    let: { categoryId: '$_id' },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        {
-                                            $eq: [
-                                                '$categoryId',
-                                                '$$categoryId',
-                                            ],
-                                        },
-                                        {
-                                            $eq: [
-                                                '$user',
-                                                new mongoose.Types.ObjectId(
-                                                    userId
-                                                ),
-                                            ],
-                                        },
-                                    ],
-                                },
-                            },
-                        },
-                    ],
-                    as: 'userSession',
-                },
-            },
-            {
-                $addFields: {
-                    userSession: { $arrayElemAt: ['$userSession', 0] },
-                },
-            },
-        ])
+        const categories = await FlashcardCategory.find(matchFlashcards)
 
         res.status(200).json({
             status: 'success',
             results: categories.length,
-            data: categories,
+            data: 'dsad',
+        })
+    }
+)
+
+const getCategoriesProgress = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const refreshToken: string = req.cookies.refreshToken
+        const decoded = authService.verifyRefreshToken(
+            refreshToken
+        ) as JwtPayload
+        const userId = decoded.userId as string
+
+        const categories = await FlashcardCategory.find({
+            $or: [
+                {
+                    isGlobal: true,
+                },
+                { userId: userId },
+            ],
+        })
+
+        const categoryData = await Promise.all(
+            categories.map(async (category) => {
+                const flashcards = await Flashcard.find({
+                    categoryId: category._id,
+                })
+                const flashcardIds = flashcards.map((f) => f._id)
+
+                const progress = await UserFlashcardProgress.find({
+                    userId,
+                    flashcardId: { $in: flashcardIds },
+                })
+
+                const visitedCount = progress.filter((p) => p.visited).length
+                const guessedCorrectly = progress.filter(
+                    (p) => p.guessedCorrectly
+                ).length
+
+                const totalCount = flashcardIds.length
+
+                return {
+                    name: category.name,
+                    description: category.description,
+                    isGlobal: category.isGlobal,
+                    userId: category.userId,
+                    totalCount,
+                    visitedCount,
+                    guessedCorrectly,
+                }
+            })
+        )
+        res.status(200).json({
+            status: 'success',
+            results: categoryData,
         })
     }
 )
@@ -98,6 +114,7 @@ const flashcardCategoryController = {
     updateFlashcardsCategory,
     deleteFlashcardsCategory,
     getUserCategoriesWithSessions,
+    getCategoriesProgress,
 }
 
 export default flashcardCategoryController
