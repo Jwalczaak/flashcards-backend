@@ -8,6 +8,8 @@ import authService from '../services/auth.service'
 import AppError from '../utils/AppError'
 import Flashcard from '../models/flashcardModel'
 import UserFlashcardProgress from '../models/userFlashcardProgress'
+import { APIFeatures } from '../utils/apiFeatures'
+import { QueryParams } from '../interfaces/ApiFeaturesOptions'
 
 const getFlashcardsCategory = handlerFactoryController.getOne(FlashcardCategory)
 
@@ -62,14 +64,42 @@ const getCategoriesProgress = catchAsync(
         ) as JwtPayload
         const userId = decoded.userId as string
 
-        const categories = await FlashcardCategory.find({
-            $or: [
-                {
-                    isGlobal: true,
-                },
-                { userId: userId },
-            ],
+        const queryParams = req.query as QueryParams
+
+        const isSearchGlobalCategories: boolean = req.params.isGlobal
+            ? true
+            : false
+
+        // let filter: object = {}
+        // for (const key of Object.keys(req.params)) {
+        //     if (filterHandlers[key]) {
+        //         filter = { ...filter, ...filterHandlers[key](req) }
+        //     }
+        // }
+
+        const baseQuery = FlashcardCategory.find({
+            $or: [{ isGlobal: true }, { userId: userId }],
         })
+
+        const categoriesFeatures = new APIFeatures({
+            query: baseQuery,
+            queryString: queryParams,
+        })
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate()
+
+        const categories = await categoriesFeatures.getQuery()
+
+        // const categories = await FlashcardCategory.find({
+        //     $or: [
+        //         {
+        //             isGlobal: true,
+        //         },
+        //         { userId: userId },
+        //     ],
+        // })
 
         const categoryData = await Promise.all(
             categories.map(async (category) => {
