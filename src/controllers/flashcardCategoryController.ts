@@ -64,22 +64,21 @@ const getCategoriesProgress = catchAsync(
         ) as JwtPayload
         const userId = decoded.userId as string
 
-        const queryParams = req.query as QueryParams
+        const queryParams = { ...req.query } as QueryParams
 
-        const isSearchGlobalCategories: boolean = req.params.isGlobal
-            ? true
-            : false
+        const orConditions = []
 
-        // let filter: object = {}
-        // for (const key of Object.keys(req.params)) {
-        //     if (filterHandlers[key]) {
-        //         filter = { ...filter, ...filterHandlers[key](req) }
-        //     }
-        // }
+        if (req.query.isGlobal === 'true') {
+            orConditions.push({ isGlobal: true })
+        } else if (req.query.isGlobal === 'false') {
+            orConditions.push({ userId: userId })
+        }
 
-        const baseQuery = FlashcardCategory.find({
-            $or: [{ isGlobal: true }, { userId: userId }],
-        })
+        if (orConditions.length === 0) {
+            orConditions.push({ isGlobal: true }, { userId: userId })
+        }
+
+        const baseQuery = FlashcardCategory.find({ $or: orConditions })
 
         const categoriesFeatures = new APIFeatures({
             query: baseQuery,
@@ -91,15 +90,6 @@ const getCategoriesProgress = catchAsync(
             .paginate()
 
         const categories = await categoriesFeatures.getQuery()
-
-        // const categories = await FlashcardCategory.find({
-        //     $or: [
-        //         {
-        //             isGlobal: true,
-        //         },
-        //         { userId: userId },
-        //     ],
-        // })
 
         const categoryData = await Promise.all(
             categories.map(async (category) => {
