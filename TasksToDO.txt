@@ -1,1 +1,6 @@
-add authorization , check good practice
+add authorization ,
+ check good practice for authorization ,
+ check interfaces, 
+ check postman, 
+ create swagger,
+ testy
